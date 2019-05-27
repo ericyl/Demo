@@ -1,12 +1,12 @@
 package com.ericyl.demo.service
 
 import com.ericyl.demo.model.Role
-import org.springframework.data.domain.Page
+import com.github.pagehelper.PageSerializable
 
 interface RoleService {
     fun admin(): String
 
-    fun findByRole(role: Role, pageNum: Int, pageSize: Int, orderBy: String?): Page<Role>
+    fun findByRole(role: Role, pageNum: Int, pageSize: Int, orderBy: String?): PageSerializable<Role>
 
     fun findAll(): List<Role>?
 

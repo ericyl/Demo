@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:include="commons::head"></head>
+    <link th:href="@{/x-editable-1.5.1/bootstrap4-editable/css/bootstrap-editable.css}" rel="stylesheet"/>
+    <style>
+        .search-custom label {
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container-scroller">
+    <div th:replace="commons::top"></div>
+    <div class="container-fluid page-body-wrapper">
+        <div class="row row-offcanvas row-offcanvas-right">
+            <div th:replace="commons::left"></div>
+            <div class="content-wrapper">
+                <h4 class="card-title">权限功能对应</h4>
+                <div class="row">
+                    <div class="col-lg-12 grid-margin stretch-card" style="margin-bottom: 0;">
+                        <div class="card" style="margin-top: 0">
+                            <div class="card-body">
+                                <p class="card-description">
+                                    用于配置权限对应功能， <code>请谨慎操作！</code>
+                                </p>
+                                <hr class="mt-2">
+
+                                <div id="search-bar" class="search-custom">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label>权限名称</label>
+                                            <input name="name" class="form-control form-control-sm"
+                                                   type="text">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>传输方式</label>
+                                            <select id="add-operate-method1" class="form-control">
+                                                <option value="" selected>全部</option>
+                                                <option value="GET">GET</option>
+                                                <option value="POST">POST</option>
+                                                <option value="PUT">PUT</option>
+                                                <option value="DELETE">DELETE</option>
+                                            </select>
+                                            <input type="hidden" name="method" id="method">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>链接地址</label>
+                                            <input name="url" class="form-control form-control-sm"
+                                                   type="text">
+                                        </div>
+                                    </div>
+
+                                    <button id="ok" type="submit" class="btn btn-primary btn-xs mt-3">搜索</button>
+                                    <button id="reset" type="button" class="btn btn-light btn-xs mt-3"
+                                            onclick="reset();">重置
+                                    </button>
+                                </div>
+
+                                <div id="toolbar">
+                                    <div class="form-inline" role="form">
+                                        <button class="btn btn-primary btn-xs"
+                                                style="margin-left: 4px; margin-right: 8px" data-toggle="modal"
+                                                data-target="#addOperate">
+                                            新增
+                                        </button>
+
+                                    </div>
+                                </div>
+                                <table id="table" class="table table-hover"
+                                       data-icon-size="sm" data-editable-url="/operate/update">
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--删除-->
+            <div class="modal fade" id="deleteInfo" tabindex="-1" role="dialog"
+                 aria-labelledby="deleteInfoLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteInfoLabel">注意</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <strong>请确认！</strong>是否执行<code>删除</code>操作？
+                            <code>本操作不可逆，请仔细斟酌！</code>
+                            <input id="id" name="id" type="hidden">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger btn-xs" id="delete-operate"
+                                    onclick="deleteOperate()">删除
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--新增功能-->
+            <div class="modal fade" id="addOperate" tabindex="-1" role="dialog"
+                 aria-labelledby="addOperateLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addOperateLabel">新增功能</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body row">
+                            <div class="form-group col-md-4">
+                                <label for="add-operate-name">名称</label>
+                                <input type="text" class="form-control form-control-sm" id="add-operate-name"
+                                       name="name" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="add-operate-method">传输方式</label>
+                                <div class="search-custom">
+                                    <select id="add-operate-method" class="form-control">
+                                        <option value="GET" selected>GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="method" id="addOperateMethod" value="GET">
+                            </div>
+                            <div class="form-group col-md-5">
+                                <label for="add-operate-url">链接地址</label>
+                                <input type="text" class="form-control form-control-sm" id="add-operate-url"
+                                       name="url" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary btn-xs" onclick="addOperate()">新增
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:replace="commons::copyright"></div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="commons::js"></div>
+<script th:src="@{/bootstrap-table-1.12.1/extensions/editable/bootstrap-table-editable.js}"></script>
+<script th:src="@{/x-editable-1.5.1/bootstrap4-editable/js/bootstrap-editable.js}"></script>
+<script th:inline="javascript">
+    var $table = $('#table'),
+        $ok = $('#ok');
+
+    $("#table").bootstrapTable({
+        toggle: 'table',
+        url: '/operate',
+        toolbar: '#toolbar',
+        toolbarAlign: 'right',
+        trimOnSearch: 'true',
+        sidePagination: 'server',
+        queryParams: 'queryParams',
+        idField: 'oid',
+        pagination: true,
+        columns: [{
+            title: '序号',
+            formatter: function (value, row, index) {
+                var pageSize = $table.bootstrapTable('getOptions').pageSize;
+                var pageNumber = $table.bootstrapTable('getOptions').pageNumber;
+                return pageSize * (pageNumber - 1) + index + 1;
+            }
+        }, {
+            field: 'oid',
+            title: 'oid',
+            visible: false
+        }, {
+            field: 'name',
+            title: '名称',
+            editable: {
+                validate: function (value) {
+                    if (!$.trim(value)) {
+                        return '不能为空';
+                    }
+                }
+            }
+        }, {
+            field: 'method',
+            title: '传输方式',
+            editable: {
+                type: 'select2',
+                source: [{id: 'GET', text: 'GET'}, {id: 'POST', text: 'POST'}, {id: 'PUT', text: 'PUT'}, {
+                    id: 'DELETE',
+                    text: 'DELETE'
+                }]
+            }
+        }, {
+            field: 'url',
+            title: '链接地址',
+            editable: {
+                validate: function (value) {
+                    if (!$.trim(value)) {
+                        return '不能为空';
+                    }
+                }
+            }
+        }, {
+            title: '操作',
+            formatter: function (value, row, index) {
+                return [
+                    '<button class="btn btn-danger btn-xs" style="margin-left: 4px" onclick="showDeleteOperate(\'' + row["oid"] + '\')">删除</button>'
+                ].join('');
+            }
+        }]
+    });
+
+    function showDeleteOperate(oid) {
+        $("#id").val(oid);
+        $("#delete-operate").show();
+        $('#deleteInfo').modal('show');
+    }
+
+    function queryParams(params) {
+        params['sid'] = $('#select-sid').val();
+        $('#search-bar').find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+        return params;
+    }
+
+
+    $(function () {
+
+
+        $("#add-operate-method").select2();
+
+        $("#add-operate-method").change(function () {
+            var method = $("#add-operate-method").val();
+            $("#addOperateMethod").val(method);
+        });
+
+
+        $("#add-operate-method1").select2();
+
+        $("#add-operate-method1").change(function () {
+            var method = $("#add-operate-method1").val();
+            $("#method").val(method);
+        });
+    });
+
+    $ok.click(function () {
+        $table.bootstrapTable('refresh');
+    });
+
+    function addOperate() {
+        var params = {};
+        $("#addOperate .modal-body").find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+        params['sid'] = $('#select-sid').val();
+
+        $.ajax({
+            url: "/operate/",
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                $('#addOperate').modal('hide');
+                $table.bootstrapTable('refresh');
+
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function deleteOperate() {
+        $.ajax({
+            url: "/operate/delete/" + $("#id").val(),
+            type: "POST",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                $('#deleteInfo').modal('hide');
+                $table.bootstrapTable('refresh');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function reset() {
+        $("#add-operate-method1").val(null).trigger("change");
+        $("input[name='name']").val(null);
+        $("input[name='method']").val(null);
+        $("input[name='url']").val(null);
+        $table.bootstrapTable('refresh');
+    }
+
+</script>
+
+</body>
+</html>

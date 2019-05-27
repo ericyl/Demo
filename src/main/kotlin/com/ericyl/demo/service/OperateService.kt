@@ -1,7 +1,7 @@
 package com.ericyl.demo.service
 
 import com.ericyl.demo.model.Operate
-import org.springframework.data.domain.Page
+import com.github.pagehelper.PageSerializable
 
 interface OperateService {
 
@@ -9,7 +9,7 @@ interface OperateService {
 
     fun rbac(roles: Array<String>): Set<Operate>
 
-    fun findBySomething(operate: Operate, pageNum: Int, pageSize: Int, orderBy: String?): Page<Operate>
+    fun findBySomething(operate: Operate, pageNum: Int, pageSize: Int, orderBy: String?): PageSerializable<Operate>
 
     fun save(operate: Operate): String?
 

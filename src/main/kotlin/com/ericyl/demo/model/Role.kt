@@ -1,18 +1,17 @@
 package com.ericyl.demo.model
 
-import javax.persistence.*
+import com.ericyl.demo.util.UUIdGenId
+import tk.mybatis.mapper.annotation.KeySql
+import javax.persistence.Column
+import javax.persistence.Id
 
-@Entity
-@Table(name = "role")
 data class Role(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        @Column(name = "rid", nullable = false, length = 10)
-        val rid: Int? = null,
-        @Column(name = "name", nullable = false, length = 100)
+        @KeySql(genId = UUIdGenId::class)
+        var rid: String? = null,
+        @Column(name = "role_name")
         val name: String? = null,
-        @Column(name = "role_key", nullable = false, length = 20, unique = true)
-        val key: String? = null,
-        @Column(name = "root", nullable = false, columnDefinition = "int(1) default 0")
+        @Column(name = "role_key")
+        var key: String? = null,
         val root: Int? = null
 )

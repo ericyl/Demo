@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <head th:include="commons::head"></head>
+    <!--    <meta http-equiv="refresh" content="10">-->
+</head>
+<body>
+
+
+<div class="container-scroller">
+    <div th:replace="commons::top"></div>
+    <div class="container-fluid page-body-wrapper">
+        <div class="row row-offcanvas row-offcanvas-right">
+            <div th:replace="commons::left"></div>
+
+
+            <div class="content-wrapper">
+                <div class="row">
+
+                    <div class="col-md-12 grid-margin stretch-card" style="margin-bottom: 0">
+                        <div class="card">
+                            <div class="card-body">
+                                我是首页
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div th:replace="commons::copyright"></div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="commons::js"></div>
+
+</body>
+</html>

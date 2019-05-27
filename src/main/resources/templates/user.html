@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:include="commons::head"></head>
+    <link rel="stylesheet" th:href="@{/patternfly-bootstrap-treeview-2.1.5/bootstrap-treeview.min.css}">
+    <link rel="stylesheet" th:href="@{/jQuery-contextMenu-2.7.1/jquery.contextMenu.css}">
+    <link th:href="@{/x-editable-1.5.1/bootstrap4-editable/css/bootstrap-editable.css}" rel="stylesheet"/>
+    <style>
+        .search-custom label {
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container-scroller">
+    <div th:replace="commons::top"></div>
+    <div class="container-fluid page-body-wrapper">
+        <div class="row row-offcanvas row-offcanvas-right">
+            <div th:replace="commons::left"></div>
+            <div class="content-wrapper">
+                <h4 class="card-title">用户管理</h4>
+                <div class="row">
+                    <div class="col-lg-12 grid-margin stretch-card" style="margin-bottom: 0;">
+                        <div class="card" style="margin-top: 0">
+                            <div class="card-body">
+                                <p class="card-description">
+                                    用于配置用户 <code>请谨慎操作！</code>
+                                </p>
+                                <hr class="mt-2">
+
+                                <div id="search-bar" class="search-custom">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <label>中文名/昵称</label>
+                                            <input name="zhname" class="form-control form-control-sm"
+                                                   type="text">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>用户名</label>
+                                            <input name="username" class="form-control form-control-sm"
+                                                   type="text">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>赋予的权限&nbsp;</label>
+                                            <select class="form-control" id="role-info">
+                                            </select>
+                                            <input type="hidden" name="rid" id="rid">
+                                        </div>
+                                    </div>
+
+                                    <button id="ok" type="submit" class="btn btn-primary btn-xs mt-3">搜索</button>
+                                    <button id="reset" type="button" class="btn btn-light btn-xs mt-3"
+                                            onclick="reset();">重置
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-stretch" style="padding-right: 0; ">
+                        <div class="row flex-grow">
+                            <div class="col-12 grid-margin stretch-card">
+                                <div class="card" style="margin-top: 0">
+                                    <div class="card-body"
+                                         style="border-right: 1px solid #f2f2f2; border-top: 1px solid #f2f2f2">
+                                        <div>
+                                            <!--<a href="javascript:;" data-toggle="modal"-->
+                                            <!--style="float: right; color: #28a745;"-->
+                                            <!--data-target="#addDept">-->
+                                            <!--<i class="fa fa-plus"-->
+                                            <!--&gt;</i>-->
+                                            <!--</a>-->
+                                            <h4 class="card-description">部门信息</h4>
+                                            <div id="dept-tree" class="tree-with-icon"></div>
+                                            <input type="hidden" id="select-sid">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-9 d-flex grid-margin align-items-stretch" style="padding-left: 0">
+                        <div class="card" style="margin-top: 0; width: 100%">
+                            <div class="card-body" style="border-top: 1px solid #f2f2f2">
+                                <h4 class="card-description" style="float:left;">用户信息</h4>
+                                <button class="btn btn-primary btn-xs"
+                                        style="margin-left: 4px; margin-right: 8px;float: right;margin-top: -10px;"
+                                        data-toggle="modal"
+                                        data-target="#addUser">
+                                    <span>新增</span>
+                                </button>
+
+                                <!--<div id="toolbar">
+                                    <div class="form-inline" role="form">
+                                        <button class="btn btn-primary btn-xs"
+                                                style="margin-left: 4px; margin-right: 8px" data-toggle="modal"
+                                                data-target="#addUser">
+                                            <span>新增</span>
+                                        </button>
+
+                                    </div>
+                                </div>-->
+                                <table id="table" class="table table-hover"
+                                       data-icon-size="sm" data-editable-url="/operate/update">
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--新增部门-->
+            <div class="modal fade" id="addDept" tabindex="-1" role="dialog"
+                 aria-labelledby="addDeptLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addDeptLabel">创建部门</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="text" class="form-control form-control" id="add-system-info-name"
+                                   name="name" required placeholder="请输入部门名称">
+                            <input type="hidden" id="add-dept-parentId" name="parentId">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary btn-xs" onclick="addDept()">新增
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--修改部门-->
+            <div class="modal fade" id="updateDept" tabindex="-1" role="dialog"
+                 aria-labelledby="updateDeptLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="updateSystemInfoLabel">修改部门信息</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body row">
+                            <input type="text" class="form-control form-control" id="modify-dept-name"
+                                   name="name" required placeholder="请输入部门名称">
+                            <input type="hidden" name="did" id="did">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary btn-xs" onclick="updateDept()">更新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--删除-->
+            <div class="modal fade" id="deleteInfo" tabindex="-1" role="dialog"
+                 aria-labelledby="deleteInfoLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteInfoLabel">注意</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <strong>请确认！</strong>是否执行<code>删除</code>操作？
+                            <code>本操作不可逆，请仔细斟酌！</code>
+                            <input id="id" name="id" type="hidden">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger btn-xs" id="delete-dept"
+                                    onclick="deleteDept()">删除部门
+                            </button>
+                            <button type="button" class="btn btn-danger btn-xs" id="delete-user"
+                                    onclick="deleteUser()">删除用户
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--新增用户-->
+            <div class="modal fade" id="addUser" role="dialog" aria-labelledby="addUserLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addUserLabel">创建用户</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body ">
+                            <div class="form-group">
+                                <label for="add-username">用户名</label>
+                                <input type="text" class="form-control form-control-sm" id="add-username"
+                                       name="username" required placeholder="请输入用户名">
+                            </div>
+                            <div class="form-group">
+                                <label for="add-username">中文名/昵称</label>
+                                <input type="text" class="form-control form-control-sm" id="add-zhname"
+                                       name="zhName" required placeholder="请输入中文名/昵称">
+                            </div>
+                            <div class="form-group">
+                                <label for="add-phone">联系方式</label>
+                                <input type="text" class="form-control form-control-sm" id="add-phone"
+                                       name="phone" required placeholder="联系方式">
+                            </div>
+                            <div class="form-group">
+                                <label for="add-dept">部门</label>
+                                <div class="search-custom">
+                                    <select id="add-dept" class="form-control" style="width: 100%"></select>
+                                </div>
+                                <input type="hidden" name="did" id="add-did">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="add-role">权限</label>
+                                <div class="search-custom">
+                                    <select id="add-role" class="form-control" style="width: 100%"></select>
+                                </div>
+                                <input type="hidden" id="addRole">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary btn-xs" onclick="addUser()">新增
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--修改用户-->
+            <div class="modal fade" id="modifyUser" role="dialog"
+                 aria-labelledby="modifyUserLable" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modifyUserLable">修改用户</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body ">
+                            <input type="hidden" name="uid" id="modify-uid">
+                            <div class="form-group">
+                                <label for="modify-username">用户名</label>
+                                <input type="text" class="form-control form-control-sm" id="modify-username" disabled
+                                       name="username" required placeholder="请输入用户名">
+                            </div>
+                            <div class="form-group">
+                                <label for="modify-username">中文名/昵称</label>
+                                <input type="text" class="form-control form-control-sm" id="modify-zhname"
+                                       name="zhName" required placeholder="请输入中文名/昵称">
+                            </div>
+                            <div class="form-group">
+                                <label for="modify-phone">联系方式</label>
+                                <input type="text" class="form-control form-control-sm" id="modify-phone"
+                                       name="phone" required placeholder="联系方式">
+                            </div>
+                            <div class="form-group">
+                                <label for="modify-dept">部门</label>
+                                <div class="search-custom">
+                                    <select id="modify-dept" class="form-control" style="width: 100%">
+
+                                    </select>
+                                </div>
+                                <input type="hidden" name="did" id="modify-did">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modify-status">状态</label>
+                                <div class="search-custom">
+                                    <select id="modify-status" class="form-control" style="width: 100%">
+                                        <option value="0">禁用</option>
+                                        <option value="1">启用</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" name="status" id="modifyStatus">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="modify-role">权限</label>
+                                <div class="search-custom">
+                                    <select id="modify-role" class="form-control"></select>
+                                </div>
+                                <input type="hidden" id="modifyRole">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="updateUser()">修改
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:replace="commons::copyright"></div>
+        </div>
+    </div>
+</div>
+<div th:replace="commons::js"></div>
+<script th:src="@{/patternfly-bootstrap-treeview-2.1.5/bootstrap-treeview.js}"></script>
+<script th:src="@{/jQuery-contextMenu-2.7.1/jquery.contextMenu.js}"></script>
+<script th:src="@{/jQuery-contextMenu-2.7.1/jquery.ui.position.js}"></script>
+<script th:src="@{/bootstrap-table-1.12.1/extensions/editable/bootstrap-table-editable.js}"></script>
+<script th:src="@{/x-editable-1.5.1/bootstrap4-editable/js/bootstrap-editable.js}"></script>
+<script th:inline="javascript">
+    var initSelect1 = 0;
+    var $table = $('#table'),
+        $ok = $('#ok');
+
+    $("#table").bootstrapTable({
+        toggle: 'table',
+        url: '/user',
+        toolbar: '#toolbar',
+        toolbarAlign: 'right',
+        trimOnSearch: 'true',
+        sidePagination: 'server',
+        queryParams: 'queryParams',
+        idField: 'oid',
+        pagination: true,
+        columns: [{
+            title: '序号',
+            formatter: function (value, row, index) {
+                var pageSize = $table.bootstrapTable('getOptions').pageSize;
+                var pageNumber = $table.bootstrapTable('getOptions').pageNumber;
+                return pageSize * (pageNumber - 1) + index + 1;
+            }
+        }, {
+            field: 'uid',
+            title: 'uid',
+            visible: false
+        }, {
+            field: 'root',
+            title: 'root',
+            visible: false
+        }, {
+            field: 'username',
+            title: '用户名'
+        }, {
+            field: 'zhName',
+            title: '中文名'
+        }, {
+            field: 'deptName',
+            title: '所属部门'
+        }, {
+            field: 'status',
+            title: '状态',
+            formatter: function (value, row, index) {
+                if (value === 1)
+                    return '正常';
+                else
+                    return '禁用';
+            }
+        }, {
+            field: 'roleName',
+            title: '已赋予的权限',
+            formatter: function (value, row, index) {
+                if (value === undefined || value === null || value === "")
+                    return "";
+                if (value.indexOf(",") == -1)
+                    return value;
+                var roles = value.split(",");
+                if (roles.length === 0)
+                    return "";
+                else if (roles.length === 1)
+                    return roles[0];
+                else
+                    return '<span data-toggle="tooltip" title="' + value + '">' + roles[0] + '...</span>';
+            }
+        }, {
+            title: '操作',
+            formatter: function (value, row, index) {
+                if (row['root'] === true)
+                    return '<button class="btn btn-outline-light btn-xs" onclick="initPassword(\'' + row['uid'] + '\')">重置密码</button>';
+                else
+                    return [
+                        '<button class="btn btn-outline-light btn-xs" onclick="initPassword(\'' + row['uid'] + '\')">重置密码</button>',
+                        '<button class="btn btn-outline-light btn-xs" style="margin-right: 4px; margin-left: 4px" onclick="showModifyUser(\'' + row['uid'] + '\')">编辑</button>',
+                        '<button class="btn btn-danger btn-xs" onclick="showDeleteInfo(\'' + row['uid'] + '\')">删除</button>'
+                    ].join('');
+            }
+        }]
+    });
+
+    function initPassword(uid) {
+        console.info(uid);
+        $.ajax({
+            url: "/user/initPwd/" + uid,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            //beforeSend: function () {
+            success: function (data) {
+                alert("初始化密码成功！");
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+        });
+    }
+
+    function showDeleteInfo(uid) {
+        $("#id").val(uid);
+        $("#delete-user").show();
+        $("#delete-dept").hide();
+        $('#deleteInfo').modal('show');
+
+    }
+
+    function showModifyUser(uid) {
+        $("#modifyUser").modal('show');
+        $.ajax({
+            url: "/user/" + uid,
+            type: "GET",
+            contentType: "application/json;charset=UTF-8",
+            beforeSend: function () {
+                $("#modify-uid").val(uid);
+            },
+            success: function (data) {
+                $("#modify-username").val(data.username);
+                $("#modify-zhname").val(data.zhName);
+                $("#modify-phone").val(data.phone);
+                $("#modify-did").val(data.did);
+                $("#modify-status").val(data.status).trigger('change');
+                $("#modifyStatus").val(data.status);
+
+                var option = new Option(data.dept.name, data.did, false, true);
+                $("#modify-dept").append(option).trigger('change');
+
+                //debugger
+                if (data.roles !== null && data.roles.length > 0) {
+                    var rid1 = [];
+                    $.each(data.roles, function (i, item) {
+                        rid1.push(item.rid);
+                        if ($('#modify-role').find("option[value='" + item.rid + "']").length==0) {
+                            $('#modify-role').append(new Option(item.name, item.rid, false, true));
+                        }
+                    });
+                    if(initSelect1==0){
+                        setModifyRole(rid1);
+                    }else{
+                        $('#modify-role').val(rid1).trigger('change');
+                    }
+
+
+                    $("#modifyRole").val(data.roles.map(function (value) {
+                        return value.rid
+                    }).join());
+                } else {
+                    $('#modify-role').val(null).trigger('change');
+                    $("#modifyRole").val(null);
+                }
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+        });
+
+    }
+
+    function setModifyRole(rid1){
+        if(initSelect1>0){
+            $('#modify-role').val(rid1).trigger('change');
+        }else{
+            setTimeout(function(){
+                setModifyRole(rid1);
+            },100);
+        }
+    }
+
+    function deleteUser() {
+        var id = $("#id").val();
+        $.ajax({
+            url: "/user/delete/" + id,
+            type: "POST",
+            contentType: "application/json;charset=UTF-8",
+            success: function (data) {
+                alert("用户删除成功！");
+                $table.bootstrapTable('refresh');
+                $('#deleteInfo').modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+        });
+    }
+
+    function queryParams(params) {
+        params['did'] = $('#select-sid').val();
+        $('#search-bar').find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+        return params;
+    }
+
+    $('#dept-tree').treeview({
+        dataUrl: {
+            url: "/dept/tree",
+            method: "GET",
+            cache: false,
+            success: function (data) {
+                if (data.length > 0)
+                    $("#select-sid").val(data[0].dataAttr.did);
+            }
+        },
+        levels: 2,
+        preventUnselect: true,
+        allowReselect: true,
+        selectedBackColor: "#dee2e6",
+        selectedColor: "#212529",
+        expandIcon: "far fa-folder-open",
+        collapseIcon: "far fa-folder-open",
+        emptyIcon: "far fa-folder",
+        loadingIcon: "fa fa-hourglass-half",
+        lazyLoad: function (node, dataHandler) {
+            $.ajax({
+                url: "/dept/tree/child",
+                type: 'GET',
+                data: {
+                    code: node.dataAttr.did
+                },
+                success: function (data) {
+                    dataHandler(data);
+                }
+            });
+        },
+        onNodeSelected: function (event, node) {
+            if (node.state.expanded) {
+                if ($("#select-sid").val() === node.dataAttr.did)
+                    $('#' + node.id + ' .expand-icon').click();
+                else {
+                    $("#select-sid").val(node.dataAttr.did);
+                    $table.bootstrapTable('refresh');
+                    if (node.dataAttr.did !== undefined)
+                        getName(node.dataAttr.did);
+                    else {
+                        $("#add-dept").html('');
+                        $("#add-did").val('');
+                    }
+                }
+            } else {
+                if ($("#select-sid").val() !== node.dataAttr.did) {
+                    $("#select-sid").val(node.dataAttr.did);
+                    $table.bootstrapTable('refresh');
+                    if (node.dataAttr.did !== undefined)
+                        getName(node.dataAttr.did);
+                    else {
+                        $("#add-dept").html('');
+                        $("#add-did").val('');
+                    }
+                }
+                $('#' + node.id + ' .expand-icon').click();
+            }
+        },
+
+        onRendered: function (event, nodes) {
+            $table.bootstrapTable('refresh');
+        }
+    });
+
+    function getName(did) {
+        $.ajax({
+            url: "/dept/name/" + did,
+            type: "GET",
+            success: function (data) {
+                var option = new Option(data, did, true, true);
+                $("#add-dept").append(option).trigger('change');
+                $("#add-did").val(did);
+            },
+            error: function (result) {
+            }
+        });
+    }
+
+    $(function () {
+        $('#dept-tree').contextMenu({
+            selector: '.root',
+            callback: function (key, options) {
+                var parentId = $(this).attr("data-did");
+                if (parentId === undefined)
+                    parentId = 0;
+                $("#add-dept-parentId").val(parentId);
+                $('#addDept').modal('show');
+            },
+            items: {
+                "insert": {name: "新增子部门", icon: "add"}
+            }
+        });
+
+        $('#dept-tree').contextMenu({
+            selector: '.list-group-item',
+            callback: function (key, options) {
+                var parentId = $(this).attr("data-did");
+                if (key === "insert") {
+                    $("#add-dept-parentId").val(parentId);
+                    $('#addDept').modal('show');
+                } else if (key === "edit") {
+                    $("#modify-dept-name").val($(this).text());
+                    $("#did").val(parentId);
+                    $('#updateDept').modal('show');
+                } else {
+                    $("#id").val(parentId);
+                    $("#delete-user").hide();
+                    $("#delete-dept").show();
+                    $('#deleteInfo').modal('show');
+                }
+            },
+            items: {
+                "insert": {name: "新增子部门", icon: "add"},
+                "edit": {name: "修改", icon: "edit"},
+                "delete": {name: "删除", icon: "delete"}
+            }
+        });
+        $("#role-info").select2({
+            ajax: {
+                url: "/role",
+                type: "GET",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        roleName: params.term,
+                        offset: (params.page || 0) * 10,
+                        limit: 10
+                    };
+                },
+                processResults: function (data, params) {
+                    var roles = [];
+                    if (data["total"] > 0) {
+                        $.each(data["rows"], function (i, item) {
+                            var tmp = {};
+                            tmp["id"] = item["rid"];
+                            tmp["text"] = item["name"];
+                            roles[i] = tmp;
+                        });
+                    }
+                    return {
+                        results: roles,
+                        pagination: {
+                            more: (((params.page || 0) + 1) * 10) < data["total"]
+                        }
+                    };
+                },
+                cache: true
+            },
+            allowClear: true,
+            placeholder: '',
+            language: "zh-CN"
+        });
+        $("#role-info").change(function () {
+            $("#rid").val($("#role-info").val());
+        });
+
+    });
+    $("#modifyUser").on("shown.bs.modal", function () {
+        $("#modify-dept").change(null);
+        $("#modify-role").change(null);
+        $("#modify-role").select2({
+            ajax: {
+                url: "/role",
+                type: "GET",
+                dataType: 'json',
+                //delay: 250,
+                data: function (params) {
+                    return {
+                        roleName: params.term,
+                        offset: (params.page || 0) * 10,
+                        limit: 10
+                    };
+                },
+                processResults: function (data, params) {
+                    var roles = [];
+                    if (data["total"] > 0) {
+                        $.each(data["rows"], function (i, item) {
+                            var tmp = {};
+                            tmp["id"] = item["rid"];
+                            tmp["text"] = item["name"];
+                            roles[i] = tmp;
+                        });
+                    }
+                    return {
+                        results: roles,
+                        pagination: {
+                            more: (((params.page || 0) + 1) * 10) < data["total"]
+                        }
+                    };
+                },
+                cache: true
+            },
+            // data: dataStore,
+            selectOnBlur: true,
+            maximumSelectionLength: 4,
+            allowClear: true,
+            placeholder: '请选择用户权限',
+            language: "zh-CN",
+            multiple: true
+        });
+        $("#modify-role").change(function () {
+            $("#modifyRole").val($("#modify-role").val());
+        });
+
+        // $("#modify-role").val($("#modifyRole").val().split(",")).trigger('change');
+
+        $("#modify-status").select2();
+
+        $("#modify-status").change(function () {
+            $("#modifyStatus").val($("#modify-status").val());
+        });
+
+        $("#modify-dept").select2({
+            ajax: {
+                url: "/dept/selectTree",
+                type: "GET",
+                dataType: 'json',
+                //delay: 250,
+                data: function (params) {
+                    return {
+                        name: params.term
+                    };
+                },
+                processResults: function (data, params) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            },
+            allowClear: true,
+            placeholder: '请选择所属部门',
+            language: "zh-CN"
+        });
+        $("#modify-dept").change(function () {
+            $("#modify-did").val($("#modify-dept").val());
+        });
+
+        initSelect1++;
+    });
+
+    $("#addUser").on("shown.bs.modal", function () {
+        $("#add-role").select2({
+            ajax: {
+                url: "/role",
+                type: "GET",
+                dataType: 'json',
+                //delay: 250,
+                data: function (params) {
+                    return {
+                        roleName: params.term,
+                        offset: (params.page || 0) * 10,
+                        limit: 10
+                    };
+                },
+                processResults: function (data, params) {
+                    var roles = [];
+                    if (data["total"] > 0) {
+                        $.each(data["rows"], function (i, item) {
+                            var tmp = {};
+                            tmp["id"] = item["rid"];
+                            tmp["text"] = item["name"];
+                            roles[i] = tmp;
+                        });
+                    }
+                    return {
+                        results: roles,
+                        pagination: {
+                            more: (((params.page || 0) + 1) * 10) < data["total"]
+                        }
+                    };
+                },
+                cache: true
+            },
+            selectOnBlur: true,
+            maximumSelectionLength: 4,
+            allowClear: true,
+            placeholder: '请选择用户权限',
+            language: "zh-CN",
+            multiple: true
+        });
+
+        $("#add-role").change(function () {
+            $("#addRole").val($("#add-role").val());
+        });
+
+        $("#add-dept").select2({
+            ajax: {
+                url: "/dept/selectTree",
+                type: "GET",
+                dataType: 'json',
+                //delay: 250,
+                data: function (params) {
+                    return {
+                        name: params.term
+                    };
+                },
+                processResults: function (data, params) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            },
+            allowClear: true,
+            placeholder: '请选择所属部门',
+            language: "zh-CN"
+        });
+        $("#add-dept").change(function () {
+            $("#add-did").val($("#add-dept").val());
+        });
+    });
+
+
+    $ok.click(function () {
+        $table.bootstrapTable('refresh');
+    });
+
+
+    function addDept() {
+        var params = {};
+        $("#addDept .modal-body").find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+
+        $.ajax({
+            url: "/dept/",
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            success: function (data) {
+                alert("创建成功");
+                var node = {
+                    text: params.name,
+                    dataAttr: {
+                        did: data
+                    },
+                    id: 'did-' + data,
+                    state: {selected: true}
+                };
+                var parentNode = $('#dept-tree').treeview('findNodes', ['did-' + params.parentId, 'id'])[0];
+                var hasLazyLoad = parentNode.lazyLoad;
+
+                var length;
+                if (parentNode.nodes === undefined)
+                    length = 0;
+                else
+                    length = parentNode.nodes.length;
+                if (hasLazyLoad === undefined)
+                    $('#dept-tree').treeview('addNode', [node, parentNode, length, {silent: true}]);
+                if (!parentNode.state.expanded) {
+                    $('#' + parentNode.id + ' .expand-icon').click();
+                }
+                $("#addDept .modal-body").find('input[name]').each(function () {
+                    $(this).val("");
+                });
+                $("#addDept").modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+        });
+    }
+
+    function deleteDept() {
+        var id = $("#id").val();
+        $.ajax({
+            url: "/dept/delete/" + id,
+            type: "POST",
+            success: function (data) {
+                alert("操作成功");
+                var node = $("#dept-tree").treeview('findNodes', ['did-' + id, 'id'])[0];
+                $("#dept-tree").treeview('removeNode', [node, {silent: true}]);
+                $('#deleteInfo').modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+        });
+    }
+
+    function updateDept() {
+        var id;
+        var params = {};
+        $("#updateDept .modal-body").find('input[name]').each(function () {
+            if ($(this).attr('name') === "did")
+                id = $(this).val();
+            params[$(this).attr('name')] = $(this).val();
+        });
+
+        $.ajax({
+            url: "/dept/update/" + id,
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            success: function (data) {
+                alert("操作成功");
+                var node = $("#dept-tree").treeview('findNodes', ['did-' + id, 'id'])[0];
+                var newNode = {
+                    text: params.name,
+                    dataAttr: node.dataAttr,
+                    id: node.id,
+                    lazyLoad: true,
+                    state: {selected: true}
+                };
+                $("#dept-tree").treeview('updateNode', [node, newNode, {silent: true}]);
+                $('#' + node.id + ' .expand-icon').click();
+                $('#updateDept').modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+        });
+    }
+
+    function addUser() {
+
+        var str = '';
+        if ($("#add-username").val() === '')
+            str = "用户名,";
+
+        if ($("#add-zhname").val() === '')
+            str = str + "中文名,";
+
+        if ($("#add-phone").val() === '')
+            str = str + "联系方式,";
+
+        if ($("#add-did").val() === '')
+            str = str + "部门,";
+
+        if ($("#addRole").val() === '')
+            str = str + "权限,";
+        if (str.length > 0) {
+            alert(str.substr(0, str.length - 1) + " 不能为空");
+            return;
+        }
+
+        var params = {};
+        $("#addUser .modal-body").find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+
+        var rolesText = $("#addRole").val().split(",");
+        var roles = new Array();
+        for (var i = 0; i < rolesText.length; i++) {
+            roles.push({rid: rolesText[i]});
+        }
+        params['roles'] = roles;
+
+        $.ajax({
+            url: "/user/",
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                $('#addUser').modal('hide');
+                $("#add-username").val('');
+                $("#add-zhname").val('');
+                $table.bootstrapTable('refresh');
+
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+
+    function updateUser() {
+        var str = '';
+        if ($("#modify-username").val() === '')
+            str = "用户名,";
+
+        if ($("#modify-zhname").val() === '')
+            str = str + "中文名,";
+
+        if ($("#modify-did").val() === '')
+            str = str + "部门,";
+
+        if ($("#modifyRole").val() === '')
+            str = str + "权限,";
+        if (str.length > 0) {
+            alert(str.substr(0, str.length - 1) + " 不能为空");
+            return;
+        }
+        var params = {};
+        $("#modifyUser .modal-body").find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+
+        var rolesText = $("#modifyRole").val().split(",");
+        var roles = new Array();
+        for (var i = 0; i < rolesText.length; i++) {
+            roles.push({rid: rolesText[i]});
+        }
+        params["roles"] = roles;
+        //console.info(JSON.stringify(params));
+        $.ajax({
+            url: "/user/update/" + $("#modify-uid").val(),
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                $('#modifyUser').modal('hide');
+                $table.bootstrapTable('refresh');
+
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function reset() {
+        $("#role").val(null).trigger("change");
+        $("input[name='username']").val(null);
+        $("input[name='zhname']").val(null);
+        $table.bootstrapTable('refresh');
+    }
+
+</script>
+
+</body>
+</html>

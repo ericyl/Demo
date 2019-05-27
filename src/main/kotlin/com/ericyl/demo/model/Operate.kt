@@ -1,19 +1,18 @@
 package com.ericyl.demo.model
 
-import javax.persistence.*
+import com.ericyl.demo.util.UUIdGenId
+import tk.mybatis.mapper.annotation.KeySql
+import javax.persistence.Column
+import javax.persistence.Id
+import javax.persistence.Transient
 
-@Entity
-@Table(name = "operate", uniqueConstraints = [UniqueConstraint(name = "operate_uindex", columnNames = ["url", "method"])])
 data class Operate(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        @Column(name = "oid", nullable = false, length = 10)
-        val oid: Int? = null,
-        @Column(name = "name", nullable = false, length = 100)
+        @KeySql(genId = UUIdGenId::class)
+        val oid: String? = null,
+        @Column(name = "operate_name")
         val name: String? = null,
-        @Column(name = "url", nullable = false, length = 100)
         val url: String? = null,
-        @Column(name = "method", nullable = false, length = 100)
         val method: String? = null,
         @Transient
         val roles: List<Role>? = null

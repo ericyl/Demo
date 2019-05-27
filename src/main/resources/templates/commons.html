@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!---->
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!--<meta name="_csrf" content="${_csrf.token}"/>-->
+    <!--<meta name="_csrf_header" content="${_csrf.headerName}"/>-->
+
+    <title>Demo</title>
+    <meta name="author" content="ericyl">
+    <link rel="stylesheet" th:href="@{/bootstrap-4.1.3/css/bootstrap.css}">
+    <link rel="stylesheet" th:href="@{/materialicons-41/materialicon.css}">
+    <link rel="stylesheet" th:href="@{/fontawesome-free-5.3.1/css/all.css}">
+    <link rel="stylesheet" th:href="@{/fontawesome-free-5.3.1/css/v4-shims.css}">
+    <link rel="stylesheet" th:href="@{/bootstrap-table-1.12.1/bootstrap-table.css}">
+    <link rel="stylesheet" th:href="@{/select2-4.0.5/css/select2.css}">
+    <link rel="stylesheet" th:href="@{/demo/css/style.css}">
+    <link rel="stylesheet" th:href="@{/demo/css/main.css}">
+
+</head>
+
+<nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row shadow" th:fragment="top">
+    <div class="text-center navbar-brand-wrapper">
+        <a class="navbar-brand " style="font-size: 1rem; color: #32323d" th:href="@{/}">Demo</a>
+    </div>
+    <div class="navbar-menu-wrapper d-flex align-items-center">
+        <ul class="navbar-nav ml-lg-auto">
+            <li class="nav-item text-nowrap">
+                <!--<a class="nav-link" style="color: #000000AA" th:href="@{/signOut.html}">退出登录</a>-->
+                <form th:action="@{/logout}" method="post">
+                    <a class="nav-link" style="color: #000000AA" href="javascript:;"
+                       onclick="parentNode.submit();">退出登录</a>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<nav class="sidebar sidebar-offcanvas" id="sidebar" th:fragment="left">
+    <ul class="nav">
+        <li id="main" class="nav-item" style="margin-top: 24px">
+            <a class="nav-link" th:href="@{/index.html}" sec:authorize-url="/index.html">
+                <span class="menu-title">首页</span>
+            </a>
+        </li>
+
+
+        <li class="nav-item nav-category">
+            <span class="nav-link">系统管理</span>
+        </li>
+
+
+        <li id="user" class="nav-item" sec:authorize-url="/user.html">
+            <a class="nav-link" th:href="@{/user.html}">
+                <span>用户管理</span>
+            </a>
+        </li>
+        <li id="operate" class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+            <a class="nav-link" th:href="@{/operate.html}">
+                <span>功能管理</span>
+            </a>
+        </li>
+        <li id="role" class="nav-item" sec:authorize-url="/role.html">
+            <a class="nav-link" th:href="@{/role.html}">
+                <span>权限分配</span>
+            </a>
+        </li>
+
+    </ul>
+</nav>
+
+<nav aria-label="breadcrumb" th:fragment="breadcrumb">
+    <ol class="breadcrumb breadcrumb-custom">
+    </ol>
+</nav>
+
+<footer class="footer" th:fragment="copyright">
+    <div class="container-fluid clearfix">
+        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2019 ericyl </span>
+    </div>
+</footer>
+
+<div th:fragment="js">
+
+    <script th:src="@{/jquery-3.3.1/jquery.js}"></script>
+    <script th:src="@{/popper.js-1.14.4/umd/popper.js}"></script>
+    <script th:src="@{/bootstrap-4.1.3/js/bootstrap.js}"></script>
+    <script th:src="@{/feathericon-4.7.3/feather.js}"></script>
+    <script>
+        feather.replace();
+        var formatDateTime = function (date) {
+            var y = date.getYear();
+            var m = date.month + 1;
+            m = m < 10 ? ('0' + m) : m;
+            var d = date.date;
+            d = d < 10 ? ('0' + d) : d;
+            return y + '-' + m + '-' + d;
+            // var h = date.getHours();
+            // var minute = date.getMinutes();
+            // minute = minute < 10 ? ('0' + minute) : minute;
+            // return y + '-' + m + '-' + d + ' ' + h + ':' + minute;
+        };
+    </script>
+    <script th:src="@{/demo/js/main.js}"></script>
+    <script th:src="@{/fontawesome-free-5.3.1/js/all.js}"></script>
+    <script th:src="@{/fontawesome-free-5.3.1/js/v4-shims.js}"></script>
+    <script th:src="@{/demo/js/off-canvas.js}"></script>
+    <script th:src="@{/demo/js/misc.js}"></script>
+    <script th:src="@{/bootstrap-table-1.12.1/bootstrap-table.js}"></script>
+    <script th:src="@{/bootstrap-table-1.12.1/locale/bootstrap-table-zh-CN.js}"></script>
+    <script th:src="@{/select2-4.0.5/js/select2.full.js}"></script>
+    <script th:src="@{/select2-4.0.5/js/i18n/zh-CN.js}"></script>
+</div>
+
+<div class="modal fade" id="loading" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop='static'
+     th:fragment="loading">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">提示</h4>
+            </div>
+            <div class="modal-body">
+                请稍候...
+            </div>
+        </div>
+    </div>
+</div>
+</html>

@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:include="commons::head"></head>
+    <link rel="stylesheet" th:href="@{/patternfly-bootstrap-treeview-2.1.5/bootstrap-treeview.min.css}">
+    <link rel="stylesheet" th:href="@{/jQuery-contextMenu-2.7.1/jquery.contextMenu.css}">
+    <link th:href="@{/x-editable-1.5.1/bootstrap4-editable/css/bootstrap-editable.css}" rel="stylesheet"/>
+    <style>
+        .list-group-item svg {
+            margin-right: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container-scroller">
+    <div th:replace="commons::top"></div>
+    <div class="container-fluid page-body-wrapper">
+        <div class="row row-offcanvas row-offcanvas-right">
+            <div th:replace="commons::left"></div>
+            <div class="content-wrapper">
+                <h4 class="card-title">权限分配</h4>
+                <div class="row">
+                    <div class="col-md-12 grid-margin stretch-card" style="margin-bottom: 0;">
+                        <div class="card" style="margin-top: 0">
+                            <div class="card-body">
+                                <p class="card-description">
+                                    用于管理员配置角色权限， <code>请谨慎修改！</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 grid-margin stretch-card"
+                         style="padding-top: 2px; padding-right: 2px; ">
+                        <div class="card" style="margin-top: 0">
+                            <div class="card-body">
+                                <div>
+                                    <a href="javascript:;" data-toggle="modal"
+                                       style="float: right; color: #007bff;"
+                                       data-target="#addRole">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                    <h4 class="card-description">角色</h4>
+                                    <div id="role-tree"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-9 grid-margin stretch-card" style="padding-top: 2px; padding-left: 0">
+                        <div class="card" style="margin-top: 0">
+                            <div class="card-body">
+                                <a id="operate-check-all" href="javascript:;"
+                                   style="float: right; color: #007bff; font-size: 0.75rem">
+                                    全选
+                                </a>
+                                <h4 class="card-description">功能</h4>
+                                <div id="operate-tree"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--新增权限-->
+        <div class="modal fade" id="addRole" tabindex="-1" role="dialog"
+             aria-labelledby="addRoleLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addRoleLabel">新增用户角色</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="form-control form-control" id="add-system-info-name"
+                               placeholder="角色名称"
+                               name="name" required>
+                        <input type="hidden" class="form-control form-control" id="add-system-info-key"
+                               name="key" th:value="${#dates.createNow().getTime()}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="addRole()">新增
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--修改权限-->
+        <div class="modal fade" id="updateRole" tabindex="-1" role="dialog"
+             aria-labelledby="updateRoleLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="updateRoleLabel">更新用户角色</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body ">
+                        <div class="form-group ">
+                            <input type="text" class="form-control form-control" id="role-name" placeholder="角色名称"
+                                   name="name" required>
+                        </div>
+                        <input type="hidden" name="rid" id="rid">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="updateRole()">更新
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--删除权限-->
+        <div class="modal fade" id="deleteInfo" tabindex="-1" role="dialog"
+             aria-labelledby="deleteInfoLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteInfoLabel">注意</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <strong>请确认！</strong>是否执行<code>删除</code>操作？
+                        <code>本操作不可逆，请仔细斟酌！</code>
+                        <input id="id" name="id" type="hidden">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-xs" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-danger btn-xs"
+                                onclick="deleteRole()">删除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="commons::copyright"></div>
+    </div>
+</div>
+</div>
+
+<div th:replace="commons::js"></div>
+<script th:src="@{/patternfly-bootstrap-treeview-2.1.5/bootstrap-treeview.js}"></script>
+<script th:src="@{/jQuery-contextMenu-2.7.1/jquery.contextMenu.js}"></script>
+<script th:src="@{/jQuery-contextMenu-2.7.1/jquery.ui.position.js}"></script>
+<script th:inline="javascript">
+    var opsize, ropsize;
+
+    $('#role-tree').treeview({
+        dataUrl: {
+            url: "/role/tree",
+            method: "GET",
+            cache: false
+        },
+        preventUnselect: true,
+        selectedBackColor: "#dee2e6",
+        selectedColor: "#212529",
+        onNodeSelected: function (event, node) {
+            var rid = $('#role-tree').treeview('getSelected')[0].dataAttr.id;
+            var disable = $('#role-tree').treeview('getSelected')[0].dataAttr.root === 1;
+            getOperate(rid, disable);
+            $("#operate-check-all").attr("disabled", disable);
+        },
+        onRendered: function (event, nodes) {
+            try {
+                var rid = $('#role-tree').treeview('getSelected')[0].dataAttr.id;
+                var disable = $('#role-tree').treeview('getSelected')[0].dataAttr.root === 1;
+                getOperate(rid, disable);
+                $("#operate-check-all").attr("disabled", disable);
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    });
+
+
+    function getOperate(rid, disable) {
+        var params = {
+            rid: rid,
+            disable: disable
+        };
+        $('#operate-tree').treeview({
+            dataUrl: {
+                url: "/operate/tree",
+                method: "GET",
+                data: params,
+                cache: false,
+                success: function (data) {
+                    ropsize = 0;
+                    opsize = data.length;
+                    $.each(data, function (i, operate) {
+                        if (operate.state.checked)
+                            ropsize++;
+                    });
+                    setFont();
+                }
+            },
+            showIcon: false,
+            showCheckbox: true,
+            uncheckedIcon: "fa fa-square-o",
+            checkedIcon: "fa fa-check-square-o",
+            highlightSelected: false,
+            onNodeSelected: function (event, node) {
+                if (node.state.checked) {
+                    $(this).treeview('uncheckNode', [node, {silent: true}]);
+                    deleteRoleOperate(node.id, node.dataAttr.value);
+                } else {
+                    $(this).treeview('checkNode', [node, {silent: true}]);
+                    addRoleOperate(node.id, node.dataAttr.id);
+                }
+            },
+            onNodeChecked: function (event, node) {
+                addRoleOperate(node.id, node.dataAttr.id);
+            },
+            onNodeUnchecked: function (event, node) {
+                deleteRoleOperate(node.id, node.dataAttr.value);
+            }
+        });
+    }
+
+    $(function () {
+        $('#role-tree').contextMenu({
+            selector: '.list-group-item',
+            callback: function (key, options) {
+                var id = $(this).attr("data-id");
+                if (key === "edit") {
+                    $("#role-name").val($(this).text());
+                    $("#role-key").val($(this).attr("data-value"));
+                    $("#rid").val(id);
+                    $('#updateRole').modal('show');
+                } else {
+                    $("#id").val(id);
+                    $('#deleteInfo').modal('show');
+                }
+            },
+            items: {
+                "edit": {name: "修改", icon: "edit"},
+                "delete": {name: "删除", icon: "delete"}
+            }
+        });
+    });
+
+
+    function addRole() {
+        var params = {};
+        $("#addRole .modal-body").find('input[name]').each(function () {
+            params[$(this).attr('name')] = $(this).val();
+        });
+
+        $.ajax({
+            url: "/role/",
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                var node = {
+                    text: params.name,
+                    dataAttr: {
+                        id: data,
+                        value: params.key,
+                        modify: 1
+                    },
+                    id: 'role-' + data,
+                    state: {selected: true}
+                };
+                var nodes = $("#role-tree").treeview('getNodes');
+                $("#role-tree").treeview('addNode', [node, nodes[node.length], nodes.length, {silent: true}]);
+                $('#role-tree').treeview('selectNode', [node, {silent: true}]);
+                var disable = $('#role-tree').treeview('getSelected')[0].dataAttr.root === 1;
+                $("#operate-check-all").attr("disabled", disable);
+                getOperate(data, disable);
+
+                $("#addRole .modal-body").find('input[name]').each(function () {
+                    $(this).val('');
+                });
+                $("#addRole").modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function deleteRole() {
+        var id = $("#id").val();
+        $.ajax({
+            url: "/role/delete/" + id,
+            type: "POST",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                var adminNode = $("#role-tree").treeview('findNodes', ['1', 'dataAttr.root'])[0];
+                $('#role-tree').treeview('selectNode', [adminNode, {silent: true}]);
+
+                var node = $("#role-tree").treeview('findNodes', ['role-' + id, 'id'])[0];
+                $("#role-tree").treeview('removeNode', [node, {silent: true}]);
+
+                $("#deleteInfo").modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function updateRole() {
+        var id;
+        var params = {};
+        $("#updateRole .modal-body").find('input[name]').each(function () {
+            if ($(this).attr('name') === "rid")
+                id = $(this).val();
+            params[$(this).attr('name')] = $(this).val();
+        });
+
+        $.ajax({
+            url: "/role/update/" + id,
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                alert("操作成功");
+                var node = $("#role-tree").treeview('findNodes', ['role-' + id, 'id'])[0];
+                var newNode = {
+                    text: params.name,
+                    dataAttr: node.dataAttr,
+                    id: node.id,
+                    state: {selected: true},
+                    class: node.class
+                };
+
+                $('#role-tree').treeview('updateNode', [node, newNode, {silent: true}]);
+                $("#updateRole").modal('hide');
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function addRoleOperate(id, oid) {
+        var params = {};
+        params['oid'] = oid;
+        var rid;
+        try {
+            rid = $('#role-tree').treeview('getSelected')[0].dataAttr.id;
+        } catch (e) {
+        }
+        if (rid === undefined) {
+            alert("无法获取rid");
+            return
+        }
+        params['rid'] = rid;
+
+        $.ajax({
+            url: "/roleOperate/",
+            type: "POST",
+            data: JSON.stringify(params),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                var node = $('#operate-tree').treeview('findNodes', [id, 'id'])[0];
+                var newNode = {
+                    text: node.text,
+                    dataAttr: {
+                        id: node.dataAttr.id,
+                        value: data
+                    },
+                    id: node.id,
+                    state: {checked: true, disabled: node.state.disabled}
+                };
+
+                $('#operate-tree').treeview('updateNode', [node, newNode, {silent: true}]);
+                ropsize++;
+                setFont();
+            },
+            error: function (result) {
+                var node = $('#operate-tree').treeview('findNodes', [id, 'id'])[0];
+                $("#operate-tree").treeview('uncheckNode', [node, {silent: true}]);
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function deleteRoleOperate(nodeid, roid) {
+        $.ajax({
+            url: "/roleOperate/delete/" + roid,
+            type: "POST",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                var node = $('#operate-tree').treeview('findNodes', [nodeid, 'id'])[0];
+                var newNode = {
+                    text: node.text,
+                    dataAttr: {
+                        id: node.dataAttr.id
+                    },
+                    id: node.id,
+                    state: {checked: false, disabled: node.state.disabled}
+                };
+                $('#operate-tree').treeview('updateNode', [node, newNode, {silent: true}]);
+                ropsize--;
+                setFont();
+            },
+            error: function (result) {
+                var node = $('#operate-tree').treeview('findNodes', [nodeid, 'id'])[0];
+                $("#operate-tree").treeview('checkNode', [node, {silent: true}]);
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function setFont() {
+        if (opsize === ropsize) {
+            $("#operate-check-all").html("取消全选");
+        } else {
+            $("#operate-check-all").html("全选");
+        }
+    }
+
+    $("#operate-check-all").click(function () {
+        // $('#role-tree').treeview('getSelected')[0]
+        if ($(this).is('[disabled]')) {
+            alert("无法修改系统管理员账号的权限");
+        } else {
+            if (opsize === ropsize) {
+                deleteList();
+            } else {
+                saveList();
+            }
+        }
+    });
+
+    function saveList() {
+        var rid;
+        try {
+            rid = $('#role-tree').treeview('getSelected')[0].dataAttr.id;
+        } catch (e) {
+        }
+        if (rid === undefined) {
+            alert("无法获取rid");
+            return
+        }
+
+        var oids = [];
+        $.each($('#operate-tree').treeview('getUnchecked'), function (i, operate) {
+            oids.push(operate.dataAttr.id);
+        });
+
+        $.ajax({
+            url: "/roleOperate/list/" + rid,
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(oids),
+            contentType: "application/json;charset=UTF-8",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                $.each($('#operate-tree').treeview('getUnchecked'), function (i, node) {
+                    var roid;
+                    $.each(data, function (j, map) {
+                        if (node.dataAttr.id === map.oid)
+                            roid = map.roid;
+                    });
+
+                    var newNode = {
+                        text: node.text,
+                        dataAttr: {
+                            id: node.dataAttr.id,
+                            value: roid
+                        },
+                        id: node.id,
+                        state: {checked: true, disabled: node.state.disabled}
+                    };
+
+                    $('#operate-tree').treeview('updateNode', [node, newNode, {silent: true}]);
+                });
+                ropsize = opsize;
+                setFont();
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+    function deleteList() {
+        var rid;
+        try {
+            rid = $('#role-tree').treeview('getSelected')[0].dataAttr.id;
+        } catch (e) {
+        }
+        if (rid === undefined) {
+            alert("无法获取到rid");
+            return;
+        }
+
+        $.ajax({
+            url: "/roleOperate/delete/list/" + rid,
+            type: "POST",
+            // beforeSend: function () {
+            //     showProgress();
+            // },
+            success: function (data) {
+                $.each($('#operate-tree').treeview('getNodes'), function (i, node) {
+                    var newNode = {
+                        text: node.text,
+                        dataAttr: {
+                            id: node.dataAttr.id
+                        },
+                        id: node.id,
+                        state: {checked: false, disabled: node.state.disabled}
+                    };
+
+                    $('#operate-tree').treeview('updateNode', [node, newNode, {silent: true}]);
+                });
+
+                ropsize = 0;
+                setFont();
+            },
+            error: function (result) {
+                var response = result.responseText;
+                var json = JSON.parse(response);
+                alert("操作失败！\n错误代码：" + json.code + "。 错误信息：" + json.message);
+            }
+            // ,
+            // complete: function () {
+            //     closeProgress();
+            // }
+        });
+    }
+
+
+</script>
+
+</body>
+</html>

@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
 
 
-//@Slf4j
-@ControllerAdvice(basePackages = ["com.dots.invoice.hospital.management.controller.rest", "com.dots.invoice.hospital.management.controller.api"])
+@ControllerAdvice(basePackages = ["com.ericyl.demo.controller.rest"])
 class RestExceptionHandler {
 
 

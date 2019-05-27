@@ -1,25 +1,24 @@
 package com.ericyl.demo.model
 
-import javax.persistence.*
+import com.ericyl.demo.util.UUIdGenId
+import tk.mybatis.mapper.annotation.KeySql
+import javax.persistence.Column
+import javax.persistence.Id
+import javax.persistence.Table
+import javax.persistence.Transient
 
-@Entity
-@Table(name="user")
+@Table(name = "USERS")
 data class User(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        @Column(name = "uid", nullable = false, length = 10)
-        val uid: Int? = null,
-        @Column(name = "username", nullable = false, length = 20, unique = true)
+        @KeySql(genId = UUIdGenId::class)
+        @Column(name = "user_id")
+        var uid: String? = null,
         val username: String? = null,
-        @Column(name = "password", nullable = false, length = 100)
-        val password: String? = null,
-        @Column(name = "zhname", nullable = true, length = 100)
+        var password: String? = null,
+        @Column(name = "zhname")
         val zhName: String? = null,
-        @Column(name = "status", nullable = true, length = 1)
-        val status: Int? = null,
-        @Column(name = "did", nullable = false, length = 10)
-        val did: Int? = null,
-        @Column(name = "phone", nullable = true, length = 20)
+        var status: Int? = null,
+        val did: String? = null,
         val phone: String? = null,
         @Transient
         val dept: Dept? = null,

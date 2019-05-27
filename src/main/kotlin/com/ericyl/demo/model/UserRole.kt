@@ -1,16 +1,15 @@
 package com.ericyl.demo.model
 
-import javax.persistence.*
+import com.ericyl.demo.util.UUIdGenId
+import tk.mybatis.mapper.annotation.KeySql
+import javax.persistence.Column
+import javax.persistence.Id
 
-@Entity
-@Table(name = "user_role", uniqueConstraints = [UniqueConstraint(name = "USER_ROLE_UINDEX", columnNames = ["uid", "rid"])])
 data class UserRole(
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
-        @Column(name = "urid", nullable = false, length = 10)
-        var urid: Int? = null,
-        @Column(name = "uid", nullable = false, length = 10)
-        var uid: Int? = null,
-        @Column(name = "rid", nullable = false, length = 10)
-        var rid: Int? = null
+        @KeySql(genId = UUIdGenId::class)
+        var urid: String? = null,
+        @Column(name = "user_id")
+        var uid: String? = null,
+        var rid: String? = null
 )

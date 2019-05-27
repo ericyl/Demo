@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head th:include="commons::head"></head>
+    <link rel="stylesheet" th:href="@{demo/css/login.css}">
+
+</head>
+<body style="background: #dee2e6">
+<div class=" form-signIn">
+    <div class="pad-top text-center">
+        <h1> 访问出现问题 </h1>
+        <h2>系统错误! 请联系管理人员反馈错误信息</h2>
+        <span style="font-size: 8rem">500</span>
+        <h5> 请点击下方按钮返回</h5>
+    </div>
+
+    <div class=" text-center">
+        <h3><i class="fa fa-hand-o-down fa-5x" aria-hidden="true"></i></h3>
+        <a class="btn btn-primary" href="javascript:history.back(-1);">返回上一页</a>
+    </div>
+
+</div>
+
+<div th:replace="commons::js"></div>
+<script th:src="@{demo/js/countUp.js}"></script>
+<script>
+
+    $(function () {
+        var count = new countUp("error-link", 10, 500, 0, 0.5);
+        window.onload = function () {
+            count.start();
+        }
+    });
+</script>
+</body>
+</html>

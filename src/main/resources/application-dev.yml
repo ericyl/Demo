@@ -1,3 +1,5 @@
+init-password: 111111
+
 properties:
   validate-code:
     image:
@@ -10,7 +12,7 @@ properties:
 spring:
   datasource:
     druid:
-      driver-class-name: com.mysql.jdbc.Driver
+      driver-class-name: oracle.jdbc.driver.OracleDriver
       url: ${db.url}
       username: ${db.username}
       password: ${db.password}
@@ -20,14 +22,14 @@ spring:
         log4j2:
           enabled: true
         stat:
-          db-type: mysql
+          db-type: oracle
           log-slow-sql: true
           slow-sql-millis: 2000
         wall:
           config:
             delete-allow: false
             drop-table-allow: false
-          db-type: mysql
+          db-type: oracle
           enabled: true
       filters: stat, wall, log4j2, config
       initial-size: 2
@@ -51,19 +53,26 @@ spring:
   thymeleaf:
     cache: false
     mode: HTML5
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
 
-#mapper:
-#  identity: MYSQL
-#  mappers:
-#    - com.ericyl.demo.util.BasicMapper
-#  not-empty: false
-#mybatis:
-#  configuration:
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-#  type-aliases-package: com.dots.invoice.hospital.management.model
 
+mapper:
+  identity: ORACLE
+  mappers:
+    - com.ericyl.demo.util.BasicMapper
+  not-empty: false
+
+pagehelper:
+  helper-dialect: oracle
+  reasonable: true
+  support-methods-arguments: true
+  page-size-zero: true
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.ericyl.demo.model
 
