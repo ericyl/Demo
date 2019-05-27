@@ -22,11 +22,22 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.1'
+//    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.0.1'
     runtimeOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'mysql:mysql-connector-java'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'com.alibaba:druid-spring-boot-starter:1.1.10'
+    implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation 'commons-collections:commons-collections:3.2.2'
+//    implementation 'tk.mybatis:mapper-spring-boot-starter:2.1.5'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity4:3.0.4.RELEASE'
+    implementation 'com.google.code.gson:gson:2.8.5'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }

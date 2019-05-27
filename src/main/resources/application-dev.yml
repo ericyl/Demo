@@ -1,0 +1,69 @@
+properties:
+  validate-code:
+    image:
+      count: 4
+      expired-seconds: 300
+      urls: /authentication/login
+      width: 88
+      height: 32
+
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.jdbc.Driver
+      url: ${db.url}
+      username: ${db.username}
+      password: ${db.password}
+      filter:
+        config:
+          enabled: true
+        log4j2:
+          enabled: true
+        stat:
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 2000
+        wall:
+          config:
+            delete-allow: false
+            drop-table-allow: false
+          db-type: mysql
+          enabled: true
+      filters: stat, wall, log4j2, config
+      initial-size: 2
+      max-active: 20
+      max-pool-prepared-statement-per-connection-size: 100
+      max-wait: 10000
+      min-idle: 2
+      pool-prepared-statements: true
+      web-stat-filter:
+        enabled: true
+        url-pattern: /druid/*
+      default-auto-commit: false
+  redis:
+    host: localhost
+    port: 6379
+  session:
+    store-type: redis
+  devtools:
+    restart:
+      enabled: true
+  thymeleaf:
+    cache: false
+    mode: HTML5
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+#mapper:
+#  identity: MYSQL
+#  mappers:
+#    - com.ericyl.demo.util.BasicMapper
+#  not-empty: false
+#mybatis:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#  type-aliases-package: com.dots.invoice.hospital.management.model
+
+

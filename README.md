@@ -8,6 +8,5 @@ Coming soon...
 * Thymeleaf 3.x
 * Thymeleaf Security 4
 * Bootstrap 4.x
-* Mybatis
 * MySQL 5.x
 * Alibaba Druid
